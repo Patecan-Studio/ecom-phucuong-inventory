@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 import { Brand, BrandModel } from './models/brand.model'
 import { BrandExistsException } from '../errors/brand.errors'
 import { Utils } from '@libs'
+import { MongoDBErrorHandler } from '@infras/mongoose'
 
 @Injectable()
 export class BrandRepository {
@@ -26,7 +27,10 @@ export class BrandRepository {
 			})
 		} catch (error) {
 			this.logger.error(error)
-			throw new BrandExistsException(brandModel.brand_name)
+			if (MongoDBErrorHandler.isDuplicatedKeyError(error, 'brand_name')) {
+				throw new BrandExistsException(brandModel.brand_name)
+			}
+			throw error
 		}
 	}
 

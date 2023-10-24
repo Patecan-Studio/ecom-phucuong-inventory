@@ -8,6 +8,7 @@ export const brandSchema = new Schema(
 			trim: true,
 			maxLength: 150,
 			required: true,
+			unique: true,
 		},
 		brand_description: {
 			type: String,
