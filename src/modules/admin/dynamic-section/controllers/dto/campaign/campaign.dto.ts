@@ -1,11 +1,9 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { Transform, Type } from 'class-transformer'
-import { IsOptional, IsArray, IsNotEmpty } from 'class-validator'
+import { IsOptional, IsArray, IsNotEmpty, IsNumber } from 'class-validator'
 
 import { DateStringToTimestamp, SuccessResponseDTO } from '@libs'
 import { CommonImage } from '../../../../../../libs/dtos/common-image.dtos'
-
-
 
 export class CampaignDTO {
 	@ApiProperty()
@@ -59,9 +57,7 @@ export class CampaignDTO {
 	constructor(props: any) {
 		Object.assign(this, props)
 	}
-
 }
-
 
 export class CreateCampaignRequestDTO {
 	@ApiProperty()
@@ -70,7 +66,6 @@ export class CreateCampaignRequestDTO {
 
 	@ApiProperty()
 	campaign_content: string
-
 
 	@ApiProperty({
 		required: false,
@@ -91,12 +86,14 @@ export class CreateCampaignRequestDTO {
 	isMarkedDelete: boolean
 
 	@ApiProperty()
-	@Transform(({ value }) => value?.getTime?.() || null)
-	startDate?: Date
+	@IsNotEmpty()
+	@IsNumber()
+	startDate: number
 
 	@ApiProperty()
-	@Transform(({ value }) => value?.getTime?.() || null)
-	endDate?: Date
+	@IsNotEmpty()
+	@IsNumber()
+	endDate: number
 }
 
 export class CreateCampaignResponseDTO extends PartialType(SuccessResponseDTO) {
@@ -111,4 +108,3 @@ export class CreateCampaignResponseDTO extends PartialType(SuccessResponseDTO) {
 		Object.assign(this, props)
 	}
 }
-

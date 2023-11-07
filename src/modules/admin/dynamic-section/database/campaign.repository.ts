@@ -2,7 +2,10 @@ import { Injectable, Logger } from '@nestjs/common'
 import mongoose from 'mongoose'
 import { Utils } from '@libs'
 import { MongoDBErrorHandler } from '@infras/mongoose'
-import { Campaign, CampaignModel } from '@modules/admin/dynamic-section/database/schemas/campaign.model'
+import {
+	Campaign,
+	CampaignModel,
+} from '@modules/admin/dynamic-section/database/schemas/campaign.model'
 import { CampaignExistsException } from '@modules/admin/dynamic-section/errors/dynamic-section.errors'
 
 @Injectable()
@@ -29,7 +32,9 @@ export class CampaignRepository {
 			})
 		} catch (error) {
 			this.logger.error(error)
-			if (MongoDBErrorHandler.isDuplicatedKeyError(error, 'campaign_name')) {
+			if (
+				MongoDBErrorHandler.isDuplicatedKeyError(error, 'campaign_name')
+			) {
 				throw new CampaignExistsException(campaignModel.campaign_name)
 			}
 			throw error

@@ -18,7 +18,7 @@ export const campaignSchema = new Schema(
 				imageUrl: { type: String },
 			},
 		],
-		campaign_link: { type: String, default: "/"},
+		campaign_link: { type: String, default: '/' },
 		start_date: {
 			type: Date,
 			default: Date.now,
@@ -41,12 +41,12 @@ export interface Campaign {
 	campaign_name: string
 	campaign_content: string
 	campaign_images: {
-		imageName: string,
-		imageUrl: string,
-	}[],
-	campaign_link: string,
-	start_date?: Date,
-	end_date?: Date,
+		imageName: string
+		imageUrl: string
+	}[]
+	campaign_link: string
+	start_date?: Date
+	end_date?: Date
 	createdAt?: Date
 	updatedAt?: Date
 }
@@ -54,4 +54,4 @@ export interface Campaign {
 // Create Index //
 campaignSchema.index({ campaign_name: 'text', campaign_link: 'text' })
 
-export const CampaignModel = mongoose.model("Campaign", campaignSchema)
+export const CampaignModel = mongoose.model('Campaign', campaignSchema)

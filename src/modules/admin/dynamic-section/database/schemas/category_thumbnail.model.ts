@@ -17,8 +17,8 @@ export const categoryThumbnailSchema = new Schema(
 			enum: ['grid', 'slider'],
 		},
 		categoryThumbnails_ids: [
-			{type: Schema.Types.ObjectId, ref: 'Category'},
-		]
+			{ type: Schema.Types.ObjectId, ref: 'Category' },
+		],
 	},
 	{
 		timestamps: true,
@@ -29,14 +29,17 @@ export const categoryThumbnailSchema = new Schema(
 export interface CategoryThumbnail {
 	_id: string
 	categoryThumbnail_name: string
-	categoryThumbnail_description: string,
-	categoryThumbnail_types: string,
-	categoryThumbnails_ids: [],
+	categoryThumbnail_description: string
+	categoryThumbnail_types: string
+	categoryThumbnails_ids: []
 	createdAt?: Date
 	updatedAt?: Date
 }
 
 // Create Index //
-categoryThumbnailSchema.index({ 'categoryThumbnails_ids': 'text'})
+categoryThumbnailSchema.index({ categoryThumbnails_ids: 'text' })
 
-export const CategoryThumbnailModel = mongoose.model("CategoryThumbnail", categoryThumbnailSchema)
+export const CategoryThumbnailModel = mongoose.model(
+	'CategoryThumbnail',
+	categoryThumbnailSchema,
+)

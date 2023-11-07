@@ -2,18 +2,11 @@ import {
 	Body,
 	ClassSerializerInterceptor,
 	Controller,
-	Delete,
-	Get,
-	Inject,
 	Logger,
-	Param,
 	Post,
-	Put,
-	Query,
 	UseInterceptors,
 } from '@nestjs/common'
-import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { SuccessResponseDTO } from '@libs'
+import { ApiResponse, ApiTags } from '@nestjs/swagger'
 
 import { AdminAuth } from '@modules/admin/auth'
 import mongoose from 'mongoose'
@@ -24,7 +17,6 @@ import {
 	CreateCampaignResponseDTO,
 } from '@modules/admin/dynamic-section/controllers/dto/campaign/campaign.dto'
 
-
 @Controller('v1/admin/campaigns')
 @ApiTags('Admin - Campaign')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -32,11 +24,7 @@ import {
 export class CampaignController {
 	private readonly logger: Logger = new Logger(CampaignController.name)
 
-	constructor(
-		private readonly campaignRepo: CampaignRepository,
-	) {
-
-	}
+	constructor(private readonly campaignRepo: CampaignRepository) {}
 
 	@Post()
 	@ApiResponse({
@@ -59,5 +47,4 @@ export class CampaignController {
 			throw error
 		}
 	}
-
 }

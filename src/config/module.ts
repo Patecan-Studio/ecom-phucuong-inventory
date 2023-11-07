@@ -5,6 +5,7 @@ import { validateConfig } from './config-validator'
 import imageUploaderConfig from './image-uploader.config'
 import authConfig from './auth.config'
 import adminProductConfig from './admin-product.config'
+import dynamicSectionConfig from './dynamic-section.config'
 
 @Module({
 	imports: [
@@ -15,6 +16,7 @@ import adminProductConfig from './admin-product.config'
 				imageUploaderConfig,
 				authConfig,
 				adminProductConfig,
+				dynamicSectionConfig,
 			],
 			validate: validateConfig,
 			envFilePath: '.env',

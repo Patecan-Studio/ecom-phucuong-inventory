@@ -18,7 +18,7 @@ export const carouselBannerSchema = new Schema(
 				imageUrl: { type: String },
 			},
 		],
-		carouselBanner_link: { type: String, default: "/"},
+		carouselBanner_link: { type: String, default: '/' },
 		start_date: {
 			type: Date,
 			default: Date.now,
@@ -39,19 +39,25 @@ export const carouselBannerSchema = new Schema(
 export interface CarouselBanner {
 	_id: string
 	carouselBanner_name: string
-	carouselBanner_description: string,
+	carouselBanner_description: string
 	carouselBanner_images: {
-		imageName: string,
-		imageUrl: string,
-	}[],
-	carouselBanner_link: string,
-	start_date?: Date,
-	end_date?: Date,
+		imageName: string
+		imageUrl: string
+	}[]
+	carouselBanner_link: string
+	start_date?: Date
+	end_date?: Date
 	createdAt?: Date
 	updatedAt?: Date
 }
 
 // Create Index //
-carouselBannerSchema.index({ 'carouselBanner_images.imageUrl': 'text', carouselBanner_link: 'text' })
+carouselBannerSchema.index({
+	'carouselBanner_images.imageUrl': 'text',
+	carouselBanner_link: 'text',
+})
 
-export const CarouselBannerModel = mongoose.model("CarouselBanner", carouselBannerSchema)
+export const CarouselBannerModel = mongoose.model(
+	'CarouselBanner',
+	carouselBannerSchema,
+)
