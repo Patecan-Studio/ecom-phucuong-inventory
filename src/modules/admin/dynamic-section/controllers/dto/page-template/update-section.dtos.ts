@@ -6,6 +6,9 @@ import { Type } from 'class-transformer'
 import { PageSectionValidator } from '../../../utils/page-section.validator'
 
 export class UpdateSectionRequestDTO {
+	@ApiProperty({
+		type: PageSectionDTO,
+	})
 	@IsNotEmpty()
 	@Validate(PageSectionValidator)
 	section: PageSectionDTO

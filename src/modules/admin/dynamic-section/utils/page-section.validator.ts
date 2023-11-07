@@ -5,6 +5,7 @@ import {
 	validate,
 } from 'class-validator'
 import {
+	FooterSectionDTO,
 	ImageSectionDTO,
 	PageSectionDTO,
 } from '../controllers/dto/page-template/page-template.dtos'
@@ -21,11 +22,17 @@ export class PageSectionValidator implements ValidatorConstraintInterface {
 					section as ImageSectionDTO,
 				)
 				break
+			case 'footer':
+				validateErrors = await this.validateFooterSection(
+					section as FooterSectionDTO,
+				)
+				break
 			default:
 				return false
 		}
 
 		if (validateErrors.length > 0) {
+			console.log(validateErrors)
 			return false
 		}
 		return true
@@ -37,7 +44,12 @@ export class PageSectionValidator implements ValidatorConstraintInterface {
 	}
 
 	private validateImageSection(section: ImageSectionDTO) {
-		const instance = plainToInstance(ImageSectionDTO, section.image_list)
+		const instance = plainToInstance(ImageSectionDTO, section)
+		return validate(instance)
+	}
+
+	private validateFooterSection(section: FooterSectionDTO) {
+		const instance = plainToInstance(FooterSectionDTO, section)
 		return validate(instance)
 	}
 }

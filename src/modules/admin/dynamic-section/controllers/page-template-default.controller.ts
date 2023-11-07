@@ -4,6 +4,7 @@ import {
 	ClassSerializerInterceptor,
 	Controller,
 	Inject,
+	Logger,
 	Post,
 	UseInterceptors,
 } from '@nestjs/common'
@@ -16,12 +17,19 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger'
 import { DynamicSectionModuleConfig } from '../interfaces'
 import { DYNAMIC_SECTION_MODULE_CONFIG } from '../constants'
 import { ImageUploader } from '@modules/admin/image-uploader'
-import { ImageSectionDTO } from './dto/page-template/page-template.dtos'
+import {
+	FooterSectionDTO,
+	ImageSectionDTO,
+} from './dto/page-template/page-template.dtos'
+import { isURL } from 'class-validator'
 
 @Controller('v1/admin/page-templates/default')
 @ApiTags('Admin - Page Template')
 @UseInterceptors(ClassSerializerInterceptor)
 export class PageTemplateDefaultController {
+	private readonly logger: Logger = new Logger(
+		PageTemplateDefaultController.name,
+	)
 	private readonly PAGE_TEMPLATE_NAME = 'default'
 	constructor(
 		private readonly pageTemplateRepo: PageTemplateRepository,
@@ -58,15 +66,20 @@ export class PageTemplateDefaultController {
 					templateId,
 					section as ImageSectionDTO,
 				)
+			case 'footer_section':
+				await this.handleFooterSection(
+					templateId,
+					section as FooterSectionDTO,
+				)
 		}
 
 		const existingSectionIndex = pageTemplate.section_list.findIndex(
 			(s) => s.name === section.name,
 		)
 		if (existingSectionIndex === -1) {
-			pageTemplate.section_list.push(section)
+			pageTemplate.section_list.push(section as any)
 		} else {
-			pageTemplate.section_list[existingSectionIndex] = section
+			pageTemplate.section_list[existingSectionIndex] = section as any
 		}
 
 		await this.pageTemplateRepo.save(pageTemplate)
@@ -85,8 +98,11 @@ export class PageTemplateDefaultController {
 		section: ImageSectionDTO,
 	) {
 		const { imageStoragePath } = this.config
-		await Promise.all(
+		const results = await Promise.all(
 			section.image_list.map(async (image) => {
+				if (isURL(image.image_url)) {
+					return
+				}
 				const url = await this.imageUploader.copyFromTempTo(
 					image.image_url,
 					`${imageStoragePath}/${templateId}/${
@@ -103,5 +119,27 @@ export class PageTemplateDefaultController {
 		section.image_list.forEach((image) => {
 			image.link_url = categoryLinkFunc(image.link_url)
 		})
+	}
+
+	private async handleFooterSection(
+		templateId: string,
+		section: FooterSectionDTO,
+	) {
+		const { imageStoragePath } = this.config
+		const { background_image_url } = section
+		if (isURL(background_image_url)) {
+			return
+		}
+		try {
+			const imageUrl = await this.imageUploader.copyFromTempTo(
+				background_image_url,
+				`${imageStoragePath}/${templateId}/${section.name}/${randomInt(
+					10000,
+				)}_${Date.now()}`,
+			)
+			section.background_image_url = imageUrl
+		} catch (error) {
+			this.logger.warn(error)
+		}
 	}
 }
