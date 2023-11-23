@@ -1,13 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Transform, Type } from 'class-transformer'
-import { IsNotEmpty } from 'class-validator'
+import { IsIn, IsNotEmpty, IsNumber, Validate } from 'class-validator'
 import { BrandDTO } from '../brand/brand.dtos'
 import { DateStringToTimestamp } from 'src/libs/decorators'
-import {
-	ProductVariant,
-	ProductVariantStatus,
-} from '@modules/admin/product/domain'
+import { ProductVariantStatus } from '@modules/admin/product/domain'
 import { CategoryDTO } from '../category/category.dtos'
+import { SIZE_UNIT } from '../../../constants'
 
 export class ProductColor {
 	@ApiProperty()
@@ -17,6 +15,31 @@ export class ProductColor {
 	@ApiProperty()
 	@IsNotEmpty()
 	label: string
+}
+
+export class ProductSize {
+	@ApiProperty()
+	@IsNotEmpty()
+	@IsNumber()
+	@Validate((params) => params.value >= 0)
+	width: number
+
+	@ApiProperty()
+	@IsNotEmpty()
+	@IsNumber()
+	@Validate((params) => params.value >= 0)
+	length: number
+
+	@ApiProperty()
+	@IsNotEmpty()
+	@IsNumber()
+	@Validate((params) => params.value >= 0)
+	height: number
+
+	@ApiProperty()
+	@IsNotEmpty()
+	@IsIn(SIZE_UNIT)
+	unit: string
 }
 
 export class ProductWeight {
@@ -49,6 +72,9 @@ export class ProductVariantDTO {
 
 	@ApiProperty()
 	material: string
+
+	@ApiProperty()
+	size: ProductSize
 
 	@ApiProperty()
 	quantity: number

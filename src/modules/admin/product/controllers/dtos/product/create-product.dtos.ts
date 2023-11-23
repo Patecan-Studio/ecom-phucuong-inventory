@@ -18,6 +18,7 @@ import {
 	ProductColor,
 	ProductDTO,
 	ProductImage,
+	ProductSize,
 	ProductWeight,
 } from './product.dtos'
 import { ProductVariantStatus } from '../../../domain'
@@ -34,6 +35,14 @@ export class CreateProductVariantDTO {
 
 	@ApiProperty()
 	material: string
+
+	@ApiProperty({
+		type: ProductSize,
+	})
+	@Type(() => ProductSize)
+	@ValidateNested()
+	@ValidateIf((params) => !isNullOrUndefined(params.obj.size))
+	size: ProductSize
 
 	@ApiProperty()
 	@IsNotEmpty()
