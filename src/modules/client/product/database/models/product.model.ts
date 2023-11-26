@@ -1,5 +1,4 @@
 import mongoose, { Schema } from 'mongoose'
-import { PRODUCT_MODEL } from '../../constants'
 
 export const productSchema = new Schema(
 	{
@@ -15,8 +14,8 @@ export const productSchema = new Schema(
 			required: true,
 		},
 		product_banner_image: {
-			imageName: String,
-			imageUrl: String,
+			type: String,
+			required: true,
 		},
 		product_slug: String, // --> Quan-Jean-cao-cap
 		product_brand: {
@@ -31,44 +30,37 @@ export const productSchema = new Schema(
 				category_logoUrl: String, // Store the brand logo URL denormalized
 			},
 		],
-		product_height: {
-			type: Number,
-		},
-		product_width: {
-			type: Number,
-		},
-		product_length: {
-			type: Number,
-		},
-		product_size_unit: {
-			type: String,
-			enum: ['cm', 'm', 'mm', 'inch'],
-		},
-		product_weight: {
-			value: { type: Number },
-			unit: {
-				type: String,
-				enum: ['kg', 'g'],
-			},
-		},
 		product_variants: [
 			{
+				_id: false,
 				sku: String,
-				color: {
-					label: String,
-					value: String,
-				},
-				material: String,
+				property_list: [
+					{
+						_id: false,
+						name: String,
+						value: String,
+						label: String,
+					},
+				],
 				price: Number,
 				discount_price: Number,
 				discount_percentage: Number,
 				quantity: Number,
 				image_list: [
 					{
+						_id: false,
 						imageName: String,
 						imageUrl: String,
 					},
 				],
+				status: {
+					type: String,
+					required: false,
+				},
+				metadata: {
+					type: Schema.Types.Mixed,
+					default: null,
+				},
 			},
 		],
 		product_warranty: {

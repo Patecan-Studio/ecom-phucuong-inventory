@@ -4,10 +4,7 @@ import { CreateProductDTO, Product, UpdateProductDTO } from '../domain'
 import { CategoryNotFoundException } from '../errors/category.errors'
 import { UpdateCategoryDTO } from './dtos/update-category.dto'
 import { CreateCategoryDTO } from './dtos/create-category.dto'
-import {
-	InvalidProductBannerImageException,
-	ProductNotFoundException,
-} from '../errors/product.errors'
+import { ProductNotFoundException } from '../errors/product.errors'
 import { InventoryService } from '@modules/admin/inventory'
 import { PRODUCT_MODULE_CONFIG } from '../constants'
 import { ProductModuleConfig } from '../interfaces'

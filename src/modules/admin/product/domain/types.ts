@@ -12,7 +12,6 @@ export interface ProductColor {
 	label: string
 	value: string
 }
-
 export interface ProductWeight {
 	value: number
 	unit: string
@@ -23,9 +22,7 @@ export enum ProductVariantStatus {
 	Inactive = 'Inactive',
 }
 
-export enum ProductVariantType {
-	None = 'None',
-	ColorOnly = 'ColorOnly',
-	MaterialOnly = 'MaterialOnly',
-	ColorAndMaterial = 'ColorAndMaterial',
+export const NONE_VARIANT = {
+	type: 'None',
+	value: 'None',
 }

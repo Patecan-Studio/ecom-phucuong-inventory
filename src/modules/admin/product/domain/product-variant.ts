@@ -1,42 +1,36 @@
 import {
 	DuplicateImageNameException,
+	DuplicateProductVariantPropertyException,
 	InvalidDiscountPriceException,
 } from '../errors/product.errors'
-import {
-	ProductColor,
-	ProductImage,
-	ProductVariantStatus,
-	ProductVariantType,
-} from './types'
+import { NONE_VARIANT, ProductImage, ProductVariantStatus } from './types'
 
 export interface ProductVariantProps {
 	sku: string
-	color: ProductColor
-	material: string
+	property_list: VariantProperty[]
 	price: number
 	discount_price: number
-	discount_percentage: number
+	discount_percentage?: number
 	quantity: number
 	image_list: ProductImage[]
+	metadata: Record<string, any>
 	status?: ProductVariantStatus
 }
 
-export type CreateProductVariantProps = Omit<
-	ProductVariantProps,
-	'discount_percentage'
->
+export interface VariantProperty {
+	name: string
+	value: string
+	label: string
+}
 
-export type UpdateVariantProps = Omit<
-	ProductVariantProps,
-	'discount_percentage'
->
+export type UpdateVariantProps = Omit<ProductVariantProps, 'sku'>
 
 export type SerializedProductVariant = ProductVariantProps
 
 export class ProductVariant {
 	protected props: ProductVariantProps
 	protected _variant: string
-	protected _variantType: ProductVariantType
+	protected _variantType: string
 
 	get sku() {
 		return this.props.sku
@@ -66,24 +60,23 @@ export class ProductVariant {
 	}
 
 	update(props: UpdateVariantProps) {
-		const { color, discount_price, image_list, material, price, quantity } =
-			props
-		this.props.color = color
-		this.props.discount_price = discount_price || price
-		this.props.image_list = image_list
-		this.props.material = material
-		this.props.price = price
-		this.props.quantity = quantity
 		this.props.discount_percentage = Math.round(
-			((price - this.props.discount_price) / price) * 100,
+			((props.price - props.discount_price) / props.price) * 100,
 		)
+		this.props.price = props.price
+		this.props.discount_price = props.discount_price
+		this.props.quantity = props.quantity
+		this.props.image_list = props.image_list
+		this.props.metadata = props.metadata
+		props.status && (this.props.status = props.status)
 
+		this.validate()
 		this.updateVariantType()
 	}
 
 	protected validate() {
 		const imageSet = new Set()
-		const { price, discount_price } = this.props
+		const { price, discount_price, property_list } = this.props
 		if (discount_price > price) {
 			throw new InvalidDiscountPriceException(price, discount_price)
 		}
@@ -93,51 +86,57 @@ export class ProductVariant {
 			}
 			imageSet.add(image.imageName)
 		})
+
+		// check if field name of property_list is unique
+		const propertySet = new Set()
+		property_list.forEach((property) => {
+			if (propertySet.has(property.name)) {
+				throw new DuplicateProductVariantPropertyException(
+					property.name,
+				)
+			}
+			propertySet.add(property.name)
+		})
 	}
 
 	protected updateVariantType() {
-		const { color, material } = this.props
-		if (!color && !material) {
-			this._variantType = ProductVariantType.None
-			this._variant = null
+		// sort property_list by name
+		this.props.property_list = this.props.property_list.sort((a, b) => {
+			if (a.name < b.name) {
+				return -1
+			}
+			if (a.name > b.name) {
+				return 1
+			}
+			return 0
+		})
+
+		const { property_list } = this.props
+		if (property_list.length === 0) {
+			this._variantType = NONE_VARIANT.type
+			this._variant = NONE_VARIANT.value
 			return
 		}
-		if (!material) {
-			this._variantType = ProductVariantType.ColorOnly
-			this._variant = color.value
-			return
-		}
-		if (!color) {
-			this._variantType = ProductVariantType.MaterialOnly
-			this._variant = material
-			return
-		}
-		this._variantType = ProductVariantType.ColorAndMaterial
-		this._variant = `${color.value}-${material}`
+		this._variantType = property_list
+			.map((property) => property.name)
+			.join('#')
+		this._variant = property_list
+			.map((property) => property.value)
+			.join('#')
 	}
 
-	static create(props: CreateProductVariantProps) {
+	static create(props: ProductVariantProps) {
 		// round to 1 decimal
-		const discount_percentage = Math.round(
-			((props.price - props.discount_price) / props.price) * 100,
-		)
-		props.color ||= null
-		props.material ||= null
+		const discount_percentage =
+			props.discount_percentage ||
+			Math.round(
+				((props.price - props.discount_price) / props.price) * 100,
+			)
 		props.status ||= ProductVariantStatus.Active
 
 		return new ProductVariant({
 			...props,
 			discount_percentage,
-		})
-	}
-
-	static createVariantNone(
-		props: Omit<CreateProductVariantProps, 'color' | 'material'>,
-	) {
-		return this.create({
-			color: null,
-			material: null,
-			...props,
 		})
 	}
 }

@@ -1,5 +1,4 @@
 import { BaseException } from '@libs'
-import { ProductVariantType } from '../domain'
 
 export class DuplicateProductNameException extends BaseException {
 	public code = 'DUPLICATE_PRODUCT_NAME'
@@ -15,6 +14,13 @@ export class DuplicateProductVariantException extends BaseException {
 	}
 }
 
+export class DuplicateProductVariantPropertyException extends BaseException {
+	public code = 'DUPLICATE_PRODUCT_VARIANT_PROPERTY'
+	constructor(property: string) {
+		super(`Product variant property is duplicated: ${property}`)
+	}
+}
+
 export class InvalidProductVariantException extends BaseException {
 	public code = 'INVAID_PRODUCT_VARIANT'
 	constructor(product_variant: string) {
@@ -22,9 +28,16 @@ export class InvalidProductVariantException extends BaseException {
 	}
 }
 
+export class MissingProductVariantException extends BaseException {
+	public code = 'MISSING_PRODUCT_VARIANT'
+	constructor(sku: string) {
+		super(`Product variant with ${sku} is missing`)
+	}
+}
+
 export class InvalidProductVariantTypeException extends BaseException {
 	public code = 'INVALID_PRODUCT_VARIANT_TYPE'
-	constructor(valid: ProductVariantType, invalid: ProductVariantType) {
+	constructor(valid: string, invalid: string) {
 		super(`Invalid product variant type: ${valid} -> ${invalid}`)
 	}
 }

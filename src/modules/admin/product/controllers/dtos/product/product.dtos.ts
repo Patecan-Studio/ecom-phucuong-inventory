@@ -1,11 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Transform, Type } from 'class-transformer'
-import { IsIn, IsNotEmpty, IsNumber, Validate } from 'class-validator'
+import {
+	IsArray,
+	IsIn,
+	IsNotEmpty,
+	IsNumber,
+	IsOptional,
+	Validate,
+	ValidateIf,
+	ValidateNested,
+} from 'class-validator'
 import { BrandDTO } from '../brand/brand.dtos'
 import { DateStringToTimestamp } from 'src/libs/decorators'
 import { ProductVariantStatus } from '@modules/admin/product/domain'
 import { CategoryDTO } from '../category/category.dtos'
 import { SIZE_UNIT } from '../../../constants'
+import { isNullOrUndefined } from '@libs'
 
 export class ProductColor {
 	@ApiProperty()
@@ -61,47 +71,73 @@ export class ProductImage {
 	@IsNotEmpty()
 	imageUrl: string
 }
-
 export class ProductVariantDTO {
 	@ApiProperty()
 	@IsNotEmpty()
 	sku: string
 
-	@ApiProperty()
+	@ApiProperty({
+		type: ProductColor,
+	})
+	@ValidateIf((params) => {
+		console.log(params)
+		return !isNullOrUndefined(params.color)
+	})
 	color: ProductColor
 
 	@ApiProperty()
+	@ValidateIf((params) => !isNullOrUndefined(params.material))
 	material: string
 
-	@ApiProperty()
+	@ApiProperty({
+		type: ProductSize,
+	})
+	@Type(() => ProductSize)
+	@ValidateNested()
+	@ValidateIf((params) => !isNullOrUndefined(params.size))
 	size: ProductSize
 
+	@ApiProperty({
+		type: ProductWeight,
+	})
+	@Type(() => ProductWeight)
+	@ValidateNested()
+	@ValidateIf((params) => !isNullOrUndefined(params.weight))
+	weight: ProductWeight
+
 	@ApiProperty()
+	@IsNotEmpty()
+	@IsNumber()
 	quantity: number
 
 	@ApiProperty()
+	@IsNotEmpty()
+	@IsNumber()
 	price: number
 
-	@ApiProperty()
-	@Transform((params) => {
-		return params.value ?? params.obj.price
+	@ApiProperty({
+		required: false,
 	})
+	@IsNumber()
+	@Transform((params) => params.value ?? params.obj.price)
 	discount_price: number
-
-	@ApiProperty()
-	discount_percentage: number
 
 	@ApiProperty({
 		type: [ProductImage],
 	})
 	@Type(() => ProductImage)
-	image_list: ProductImage[]
+	@IsArray()
+	@IsOptional()
+	@ValidateNested()
+	image_list: ProductImage[] = []
 
 	@ApiProperty({
 		type: ProductVariantStatus,
+		required: false,
 		enum: [ProductVariantStatus.Active, ProductVariantStatus.Inactive],
 	})
-	status: ProductVariantStatus
+	@IsOptional()
+	status: ProductVariantStatus = ProductVariantStatus.Active
 }
 
 export class ProductDTO {
@@ -128,22 +164,6 @@ export class ProductDTO {
 	@Type(() => CategoryDTO)
 	product_categories: CategoryDTO[]
 
-	@ApiProperty()
-	product_height: number
-
-	@ApiProperty()
-	product_width: number
-
-	@ApiProperty()
-	product_length: number
-
-	@ApiProperty()
-	product_size_unit: string[]
-
-	@ApiProperty()
-	@Type(() => ProductWeight)
-	product_weight: ProductWeight
-
 	@ApiProperty({
 		type: [ProductVariantDTO],
 	})
@@ -158,6 +178,12 @@ export class ProductDTO {
 
 	@ApiProperty()
 	has_material: boolean
+
+	@ApiProperty()
+	has_size: boolean
+
+	@ApiProperty()
+	has_weight: boolean
 
 	@ApiProperty()
 	product_warranty: string
@@ -176,9 +202,28 @@ export class ProductDTO {
 
 	constructor(props: any) {
 		Object.assign(this, props)
-		const firstVariant = props.product_variants[0]
+
+		this.product_variants = props.product_variants.map((variant) => {
+			const { property_list, ...variantProps } = variant
+			const properties = property_list.reduce((pre, cur) => {
+				const { name, ...property } = cur
+				pre[name] = property
+				return pre
+			}, {})
+			return {
+				...variantProps,
+				color: properties.color,
+				material: properties.material.value,
+				size: properties.size,
+				weight: properties.weight,
+			}
+		})
+
+		const firstVariant = this.product_variants[0]
 
 		this.has_color = !!firstVariant.color
 		this.has_material = !!firstVariant.material
+		this.has_size = !!firstVariant.size
+		this.has_weight = !!firstVariant.weight
 	}
 }

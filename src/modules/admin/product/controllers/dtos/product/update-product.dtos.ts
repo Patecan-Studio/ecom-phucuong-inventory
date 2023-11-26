@@ -1,12 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
-import {
-	ProductDTO,
-	ProductImage,
-	ProductVariantDTO,
-	ProductWeight,
-} from './product.dtos'
+import { ProductDTO, ProductVariantDTO } from './product.dtos'
 import { Type } from 'class-transformer'
-import { BrandDTO } from '../brand/brand.dtos'
 import { SuccessResponseDTO } from '@libs'
 import {
 	ArrayMinSize,
@@ -36,22 +30,6 @@ export class UpdateProductRequestDTO {
 	@IsArray()
 	@ArrayMinSize(1)
 	product_categories: string[]
-
-	@ApiProperty()
-	product_height: number
-
-	@ApiProperty()
-	product_width: number
-
-	@ApiProperty()
-	product_length: number
-
-	@ApiProperty()
-	product_size_unit: string
-
-	@ApiProperty()
-	@Type(() => ProductWeight)
-	product_weight: ProductWeight
 
 	@ApiProperty({
 		type: [ProductVariantDTO],

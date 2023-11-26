@@ -98,10 +98,9 @@ export class ProductController {
 		@Param() params: ObjectIdParam,
 		@Body() dto: UpdateProductRequestDTO,
 	): Promise<UpdateProductResponseDTO> {
-		await this.productService.updateProduct(params.id, dto)
-		const product = await this.productRepo.queryById(params.id)
+		const product = await this.productService.updateProduct(params.id, dto)
 		return new UpdateProductResponseDTO({
-			data: new ProductDTO(product),
+			data: new ProductDTO(product.serialize()),
 		})
 	}
 

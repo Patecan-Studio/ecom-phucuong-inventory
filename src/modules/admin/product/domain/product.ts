@@ -3,53 +3,19 @@ import {
 	InsufficientProductVariantException,
 	InvalidProductVariantException,
 	InvalidProductVariantTypeException,
+	MissingProductVariantException,
 } from '../errors/product.errors'
 import {
-	CreateProductVariantProps,
+	CreateProductDTO,
+	CreateProductVariantDTO,
+	UpdateProductDTO,
+} from './interfaces'
+import {
 	ProductVariant,
 	SerializedProductVariant,
-	UpdateVariantProps,
+	VariantProperty,
 } from './product-variant'
-import {
-	ProductImage,
-	ProductStatus,
-	ProductVariantStatus,
-	ProductVariantType,
-	ProductWeight,
-} from './types'
-
-export interface CreateProductDTO {
-	product_name: string
-	product_description: string
-	product_banner_image: string
-	product_brand: string
-	product_categories: string[]
-	product_height: number
-	product_width: number
-	product_length: number
-	product_size_unit: string
-	product_weight: ProductWeight
-	product_variants: CreateProductVariantProps[]
-	product_warranty: string
-	isPublished?: boolean
-	_id?: string
-}
-
-export interface UpdateProductDTO {
-	product_name: string
-	product_description: string
-	product_banner_image: string
-	product_brand: string
-	product_categories: string[]
-	product_height: number
-	product_width: number
-	product_length: number
-	product_size_unit: string
-	product_weight: ProductWeight
-	product_variants: UpdateVariantProps[]
-	product_warranty: string
-	isPublished?: boolean
-}
+import { NONE_VARIANT, ProductStatus, ProductVariantStatus } from './types'
 
 export interface ProductProps {
 	_id?: string
@@ -58,11 +24,6 @@ export interface ProductProps {
 	product_banner_image: string
 	product_brand: string
 	product_categories: string[]
-	product_height: number
-	product_width: number
-	product_length: number
-	product_size_unit: string
-	product_weight: ProductWeight
 	product_variants: ProductVariant[]
 	product_status: ProductStatus
 	product_warranty: string
@@ -92,47 +53,52 @@ export class Product {
 	update(dto: UpdateProductDTO) {
 		this.props.product_status = ProductStatus.Published
 
-		if (dto.product_variants.length > this.props.product_variants.length) {
-			const updatedVariantSku = dto.product_variants.map(
-				(variant) => variant.sku,
-			)
-			const oldVariantSku = this.props.product_variants.map(
-				(variant) => variant.sku,
-			)
+		const { product_variants } = this.props
 
-			const variantNotInOld = updatedVariantSku.filter(
-				(variant) => !oldVariantSku.includes(variant),
+		product_variants.forEach((variant) => {
+			const updated = dto.product_variants.find(
+				(updated) => updated.sku === variant.sku,
 			)
-
-			variantNotInOld.forEach((sku) => {
-				const variant = dto.product_variants.find(
-					(variant) => variant.sku === sku,
-				)
-				this.props.product_variants.push(ProductVariant.create(variant))
-			})
-		}
-
-		dto.product_variants.forEach((updated) => {
-			const variant = this.props.product_variants.find(
-				(variant) => variant.sku === updated.sku,
-			)
-			if (!variant) {
-				throw new InvalidProductVariantException(updated.sku)
+			if (!updated) {
+				throw new MissingProductVariantException(variant.sku)
 			}
 
-			variant.update(updated)
+			const { property_list, metadata } =
+				Product.createPropertyList(updated)
+
+			variant.update({
+				...updated,
+				metadata,
+				property_list,
+			})
 		})
+
+		if (dto.product_variants.length > this.props.product_variants.length) {
+			const newVariantList = dto.product_variants.filter(
+				(variant) =>
+					!this.props.product_variants.find(
+						(v) => v.sku === variant.sku,
+					),
+			)
+
+			newVariantList.forEach((variant) => {
+				const { property_list, metadata } =
+					Product.createPropertyList(variant)
+				product_variants.push(
+					ProductVariant.create({
+						...variant,
+						metadata,
+						property_list,
+					}),
+				)
+			})
+		}
 
 		this.props.product_name = dto.product_name
 		this.props.product_description = dto.product_description
 		this.props.product_banner_image = dto.product_banner_image
 		this.props.product_brand = dto.product_brand
 		this.props.product_categories = dto.product_categories
-		this.props.product_height = dto.product_height
-		this.props.product_width = dto.product_width
-		this.props.product_length = dto.product_length
-		this.props.product_size_unit = dto.product_size_unit
-		this.props.product_weight = dto.product_weight
 		this.props.product_warranty =
 			dto.product_warranty || this.props.product_warranty
 
@@ -169,18 +135,6 @@ export class Product {
 			return
 		}
 
-		// Remove check for VariantType of None since it is deprecated
-		// if (activeProductVariants.length === 1) {
-		// 	const variant = this.props.product_variants[0]
-		// 	if (variant.variantType !== ProductVariantType.None) {
-		// 		throw new InvalidProductVariantTypeException(
-		// 			ProductVariantType.None,
-		// 			variant.variantType,
-		// 		)
-		// 	}
-		// 	return
-		// }
-
 		// if there are multiple variants, SKU must be unique and variant type of all variants must be the same regardless of their status
 		const validVariantType = this.props.product_variants[0].variantType
 		const variantSet = new Set()
@@ -188,7 +142,7 @@ export class Product {
 		for (const variant of this.props.product_variants) {
 			if (
 				variant.variantType !== validVariantType ||
-				variant.variantType === ProductVariantType.None
+				variant.variantType == NONE_VARIANT.type
 			) {
 				throw new InvalidProductVariantTypeException(
 					validVariantType,
@@ -215,14 +169,72 @@ export class Product {
 			? ProductStatus.Published
 			: ProductStatus.Draft
 
-		const variants = dto.product_variants.map((variant) =>
-			ProductVariant.create(variant),
-		)
+		const variants = dto.product_variants.map((variant) => {
+			const { property_list, metadata } =
+				Product.createPropertyList(variant)
+			return ProductVariant.create({
+				...variant,
+				metadata,
+				property_list: property_list,
+			})
+		})
 
 		return new Product({
 			...props,
 			product_variants: variants,
 			product_status: status,
 		})
+	}
+
+	private static createPropertyList(variant: CreateProductVariantDTO) {
+		const property_list: VariantProperty[] = []
+		const metadata = {}
+		if (variant.color) {
+			property_list.push({
+				name: 'color',
+				label: variant.color.label,
+				value: variant.color.value,
+			})
+			metadata['color'] = variant.color.value
+		}
+		if (variant.material) {
+			property_list.push({
+				name: 'material',
+				label: variant.material,
+				value: variant.material,
+			})
+			metadata['material'] = variant.material
+		}
+		if (variant.size) {
+			const value = `${variant.size.width}x${variant.size.height}x${variant.size.length}|${variant.size.unit}`
+			property_list.push({
+				name: 'size',
+				label: value,
+				value,
+			})
+			metadata['size'] = {
+				width: variant.size.width,
+				height: variant.size.height,
+				length: variant.size.length,
+				unit: variant.size.unit,
+			}
+		}
+		if (variant.weight) {
+			const value = `${variant.weight.value}|${variant.weight.unit}`
+			property_list.push({
+				name: 'weight',
+				label: value,
+				value,
+			})
+			metadata['weight'] = {
+				value: variant.weight.value,
+				unit: variant.weight.unit,
+			}
+		}
+
+		return {
+			property_list,
+			metadata,
+		}
 	}
 }

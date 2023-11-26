@@ -20,6 +20,28 @@ export class ProductColor {
 	value: string
 }
 
+export class ProductWeight {
+	@ApiProperty()
+	unit: string
+
+	@ApiProperty()
+	value: number
+}
+
+export class ProductSize {
+	@ApiProperty()
+	width: number
+
+	@ApiProperty()
+	length: number
+
+	@ApiProperty()
+	height: number
+
+	@ApiProperty()
+	unit: string
+}
+
 export class ProductImage {
 	@ApiProperty()
 	imageName: string
@@ -50,6 +72,12 @@ export class ProductVariant {
 
 	@ApiProperty()
 	material: string
+
+	@ApiProperty()
+	size: ProductSize
+
+	@ApiProperty()
+	weight: ProductWeight
 
 	@ApiProperty()
 	quantity: number
@@ -206,12 +234,21 @@ export class ProductDetailResponseDTO {
 
 	constructor(props: any) {
 		Object.assign(this, props)
-		const firstVariant = props.product_variants[0]
-		this.sku = firstVariant.sku
-		this.price = firstVariant.price
-		this.discount_percentage = firstVariant.discount_percentage
-		this.discount_price = firstVariant.discount_price
-		this.quantity = firstVariant.quantity
-		this.image = firstVariant.image_list[0]
+
+		this.product_variants = props.product_variants.map((variant) => {
+			const { property_list, ...variantProps } = variant
+			const properties = property_list.reduce((pre, cur) => {
+				const { name, ...property } = cur
+				pre[name] = property
+				return pre
+			}, {})
+			return {
+				...variantProps,
+				color: properties.color,
+				material: properties.material.value,
+				size: properties.size,
+				weight: properties.weight,
+			}
+		})
 	}
 }

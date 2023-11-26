@@ -72,11 +72,6 @@ export class ProductRepository extends BaseRepository {
 			product_brand: brand.toObject({}),
 			product_categories: categoryList.map((cate) => cate.toObject()),
 			product_variant_list: raw.product_variants,
-			product_weight: raw.product_weight,
-			product_height: raw.product_height,
-			product_width: raw.product_width,
-			product_length: raw.product_length,
-			product_size_unit: raw.product_size_unit,
 			product_status: raw.product_status,
 			product_variants: raw.product_variants,
 			product_warranty: raw.product_warranty,
@@ -89,9 +84,19 @@ export class ProductRepository extends BaseRepository {
 			const result = await model.save({
 				session: this.session,
 			})
-			const materialList = result.product_variants.map((variant) => ({
-				material_name: variant.material,
-			}))
+			const materialList = result.product_variants
+				.map((variant) => {
+					const materialProperty = variant.property_list.find(
+						(prop) => prop.name === 'material',
+					)
+					if (materialProperty) {
+						return {
+							material_name: materialProperty.value,
+						}
+					}
+					return null
+				})
+				.filter((material) => !!material)
 			await this.batchSaveMaterials(materialList)
 
 			product.setId(result._id.toString())

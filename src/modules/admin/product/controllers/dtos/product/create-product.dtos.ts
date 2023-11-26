@@ -1,83 +1,15 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
-import { Transform, Type } from 'class-transformer'
+import { Type } from 'class-transformer'
 import {
 	ArrayMinSize,
-	IsArray,
-	IsIn,
 	IsNotEmpty,
-	IsNumber,
 	IsOptional,
-	IsPositive,
-	MinLength,
-	ValidateIf,
 	ValidateNested,
 } from 'class-validator'
-import { SIZE_UNIT } from '../../../constants'
-import { SuccessResponseDTO, isNullOrUndefined } from '@libs'
-import {
-	ProductColor,
-	ProductDTO,
-	ProductImage,
-	ProductSize,
-	ProductWeight,
-} from './product.dtos'
-import { ProductVariantStatus } from '../../../domain'
+import { SuccessResponseDTO } from '@libs'
+import { ProductDTO, ProductVariantDTO } from './product.dtos'
 
-export class CreateProductVariantDTO {
-	@ApiProperty()
-	@IsNotEmpty()
-	sku: string
-
-	@ApiProperty({
-		type: ProductColor,
-	})
-	color: ProductColor
-
-	@ApiProperty()
-	material: string
-
-	@ApiProperty({
-		type: ProductSize,
-	})
-	@Type(() => ProductSize)
-	@ValidateNested()
-	@ValidateIf((params) => !isNullOrUndefined(params.obj.size))
-	size: ProductSize
-
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsNumber()
-	quantity: number
-
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsNumber()
-	price: number
-
-	@ApiProperty({
-		required: false,
-	})
-	@IsNumber()
-	@Transform((params) => params.value ?? params.obj.price)
-	discount_price: number
-
-	@ApiProperty({
-		type: [ProductImage],
-	})
-	@Type(() => ProductImage)
-	@IsArray()
-	@IsOptional()
-	@ValidateNested()
-	image_list: ProductImage[] = []
-
-	@ApiProperty({
-		type: ProductVariantStatus,
-		required: false,
-		enum: [ProductVariantStatus.Active, ProductVariantStatus.Inactive],
-	})
-	@IsOptional()
-	status: ProductVariantStatus = ProductVariantStatus.Active
-}
+export type CreateProductVariantDTO = ProductVariantDTO
 
 export class CreateProductRequestDTO {
 	@ApiProperty()
@@ -95,24 +27,6 @@ export class CreateProductRequestDTO {
 	product_categories: string[]
 
 	@ApiProperty()
-	@Type(() => ProductWeight)
-	product_weight: ProductWeight
-
-	@ApiProperty()
-	product_height: number
-
-	@ApiProperty()
-	product_width: number
-
-	@ApiProperty()
-	product_length: number
-
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsIn(SIZE_UNIT)
-	product_size_unit: string
-
-	@ApiProperty()
 	@IsOptional()
 	product_banner_image: string
 
@@ -123,9 +37,9 @@ export class CreateProductRequestDTO {
 	product_warranty: string = null
 
 	@ApiProperty({
-		type: [CreateProductVariantDTO],
+		type: [ProductVariantDTO],
 	})
-	@Type(() => CreateProductVariantDTO)
+	@Type(() => ProductVariantDTO)
 	@ArrayMinSize(1)
 	@ValidateNested({ each: true })
 	product_variants: CreateProductVariantDTO[]
