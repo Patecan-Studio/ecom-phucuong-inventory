@@ -81,6 +81,7 @@ export const productSchema = new Schema(
 	{
 		collection: 'Products',
 		timestamps: true,
+		minimize: false,
 	},
 )
 
