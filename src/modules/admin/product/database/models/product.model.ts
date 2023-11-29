@@ -62,7 +62,7 @@ export const productSchema = new Schema(
 				},
 				metadata: {
 					type: Schema.Types.Mixed,
-					default: null,
+					default: {},
 				},
 			},
 		],

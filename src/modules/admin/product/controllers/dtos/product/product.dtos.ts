@@ -212,10 +212,10 @@ export class ProductDTO {
 			}, {})
 			return {
 				...variantProps,
-				color: properties.color,
-				material: properties.material.value,
-				size: properties.size,
-				weight: properties.weight,
+				color: properties.color ?? null,
+				material: properties.material?.value ?? null,
+				size: properties.size ?? null,
+				weight: properties.weight ?? null,
 			}
 		})
 
