@@ -152,8 +152,10 @@ export class ClientProductDTO {
 	image: ProductImage
 
 	constructor(props: any) {
-		Object.assign(this, props)
 		const firstVariant = props.product_variants[0]
+		delete props.product_variants
+
+		Object.assign(this, props)
 		this.sku = firstVariant.sku
 		this.price = firstVariant.price
 		this.discount_percentage = firstVariant.discount_percentage
@@ -238,8 +240,8 @@ export class ProductDetailResponseDTO {
 		this.product_variants = props.product_variants.map((variant) => {
 			const { property_list, ...variantProps } = variant
 			const properties = property_list.reduce((pre, cur) => {
-				const { name, ...property } = cur
-				pre[name] = property
+				const { key, value } = cur
+				pre[key] = value
 				return pre
 			}, {})
 			return {

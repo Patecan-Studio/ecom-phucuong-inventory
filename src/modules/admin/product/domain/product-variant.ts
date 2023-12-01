@@ -18,9 +18,8 @@ export interface ProductVariantProps {
 }
 
 export interface VariantProperty {
-	name: string
+	key: string
 	value: string
-	label: string
 }
 
 export type UpdateVariantProps = Omit<ProductVariantProps, 'sku'>
@@ -90,22 +89,20 @@ export class ProductVariant {
 		// check if field name of property_list is unique
 		const propertySet = new Set()
 		property_list.forEach((property) => {
-			if (propertySet.has(property.name)) {
-				throw new DuplicateProductVariantPropertyException(
-					property.name,
-				)
+			if (propertySet.has(property.key)) {
+				throw new DuplicateProductVariantPropertyException(property.key)
 			}
-			propertySet.add(property.name)
+			propertySet.add(property.key)
 		})
 	}
 
 	protected updateVariantType() {
 		// sort property_list by name
 		this.props.property_list = this.props.property_list.sort((a, b) => {
-			if (a.name < b.name) {
+			if (a.key < b.key) {
 				return -1
 			}
-			if (a.name > b.name) {
+			if (a.key > b.key) {
 				return 1
 			}
 			return 0
@@ -118,7 +115,7 @@ export class ProductVariant {
 			return
 		}
 		this._variantType = property_list
-			.map((property) => property.name)
+			.map((property) => property.key)
 			.join('#')
 		this._variant = property_list
 			.map((property) => property.value)

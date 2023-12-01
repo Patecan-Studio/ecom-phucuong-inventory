@@ -39,9 +39,8 @@ export const productSchema = new Schema(
 				property_list: [
 					{
 						_id: false,
-						name: String,
+						key: String,
 						value: String,
-						label: String,
 					},
 				],
 				price: Number,

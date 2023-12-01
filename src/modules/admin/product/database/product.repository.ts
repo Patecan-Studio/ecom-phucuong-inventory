@@ -87,7 +87,7 @@ export class ProductRepository extends BaseRepository {
 			const materialList = result.product_variants
 				.map((variant) => {
 					const materialProperty = variant.property_list.find(
-						(prop) => prop.name === 'material',
+						(prop) => prop.key === 'material',
 					)
 					if (materialProperty) {
 						return {

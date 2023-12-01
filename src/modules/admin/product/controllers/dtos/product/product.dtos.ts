@@ -204,18 +204,13 @@ export class ProductDTO {
 		Object.assign(this, props)
 
 		this.product_variants = props.product_variants.map((variant) => {
-			const { property_list, ...variantProps } = variant
-			const properties = property_list.reduce((pre, cur) => {
-				const { name, ...property } = cur
-				pre[name] = property
-				return pre
-			}, {})
+			const { property_list, metadata, ...variantProps } = variant
 			return {
 				...variantProps,
-				color: properties.color ?? null,
-				material: properties.material?.value ?? null,
-				size: properties.size ?? null,
-				weight: properties.weight ?? null,
+				color: metadata.color ?? null,
+				material: metadata.material ?? null,
+				size: metadata.size ?? null,
+				weight: metadata.weight ?? null,
 			}
 		})
 

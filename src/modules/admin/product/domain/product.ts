@@ -191,16 +191,14 @@ export class Product {
 		const metadata = {}
 		if (variant.color) {
 			property_list.push({
-				name: 'color',
-				label: variant.color.label,
+				key: 'color',
 				value: variant.color.value,
 			})
-			metadata['color'] = variant.color.value
+			metadata['color'] = variant.color
 		}
 		if (variant.material) {
 			property_list.push({
-				name: 'material',
-				label: variant.material,
+				key: 'material',
 				value: variant.material,
 			})
 			metadata['material'] = variant.material
@@ -208,8 +206,7 @@ export class Product {
 		if (variant.size) {
 			const value = `${variant.size.width}x${variant.size.height}x${variant.size.length}|${variant.size.unit}`
 			property_list.push({
-				name: 'size',
-				label: value,
+				key: 'size',
 				value,
 			})
 			metadata['size'] = {
@@ -222,14 +219,10 @@ export class Product {
 		if (variant.weight) {
 			const value = `${variant.weight.value}|${variant.weight.unit}`
 			property_list.push({
-				name: 'weight',
-				label: value,
+				key: 'weight',
 				value,
 			})
-			metadata['weight'] = {
-				value: variant.weight.value,
-				unit: variant.weight.unit,
-			}
+			metadata['weight'] = variant.weight
 		}
 
 		return {
