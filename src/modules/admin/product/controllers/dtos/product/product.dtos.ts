@@ -63,21 +63,42 @@ export class ProductWeight {
 }
 
 export class ProductImage {
-	@ApiProperty()
+	@ApiProperty({
+		required: true,
+		description:
+			'Name of the image. This name must be unique within variant',
+		example: '5001698574720731',
+	})
 	@IsNotEmpty()
 	imageName: string
 
-	@ApiProperty()
+	@ApiProperty({
+		required: true,
+		description:
+			'When create or update product, this value is path of image in temp folder. When get product, this value is path of image in public folder',
+		example: 'temp/5001698574720731',
+	})
 	@IsNotEmpty()
 	imageUrl: string
 }
 export class ProductVariantDTO {
-	@ApiProperty()
+	@ApiProperty({
+		required: false,
+		description:
+			'SKU of the product variant. SKU must be unique across all products',
+		example: 'SKU-011223-01-001',
+	})
 	@IsNotEmpty()
 	sku: string
 
 	@ApiProperty({
 		type: ProductColor,
+		description:
+			'Color of the product. This is one of the variant properties',
+		example: {
+			label: 'Đỏ',
+			value: '#ff0000',
+		},
 	})
 	@ValidateIf((params) => {
 		console.log(params)
@@ -85,12 +106,26 @@ export class ProductVariantDTO {
 	})
 	color: ProductColor
 
-	@ApiProperty()
+	@ApiProperty({
+		required: false,
+		description:
+			'Material of the variant. This is one of the variant properties',
+		example: 'Vải',
+	})
 	@ValidateIf((params) => !isNullOrUndefined(params.material))
 	material: string
 
 	@ApiProperty({
 		type: ProductSize,
+		required: false,
+		description:
+			'Size of the variant. This is one of the variant properties',
+		example: {
+			width: 10,
+			length: 20,
+			height: 30,
+			unit: 'cm',
+		},
 	})
 	@Type(() => ProductSize)
 	@ValidateNested()
@@ -99,24 +134,42 @@ export class ProductVariantDTO {
 
 	@ApiProperty({
 		type: ProductWeight,
+		required: false,
+		description:
+			'Weight of the variant. This is one of the variant properties',
+		example: {
+			unit: 'kg',
+			value: 0.5,
+		},
 	})
 	@Type(() => ProductWeight)
 	@ValidateNested()
 	@ValidateIf((params) => !isNullOrUndefined(params.weight))
 	weight: ProductWeight
 
-	@ApiProperty()
+	@ApiProperty({
+		required: true,
+		description: 'Quantity of the variant',
+		example: 10,
+	})
 	@IsNotEmpty()
 	@IsNumber()
 	quantity: number
 
-	@ApiProperty()
+	@ApiProperty({
+		required: true,
+		description: 'Price of the variant',
+		example: 100000,
+	})
 	@IsNotEmpty()
 	@IsNumber()
 	price: number
 
 	@ApiProperty({
 		required: false,
+		description:
+			'Discount price of the variant. This value should be less than price',
+		example: 90000,
 	})
 	@IsNumber()
 	@Transform((params) => params.value ?? params.obj.price)
@@ -124,6 +177,18 @@ export class ProductVariantDTO {
 
 	@ApiProperty({
 		type: [ProductImage],
+		required: false,
+		description: 'List of images of the variant',
+		example: [
+			{
+				imageName: '5001698574720731',
+				imageUrl: 'temp/5001698574720731',
+			},
+			{
+				imageName: '4291698574408393',
+				imageUrl: 'temp/4291698574408393',
+			},
+		],
 	})
 	@Type(() => ProductImage)
 	@IsArray()
@@ -134,7 +199,10 @@ export class ProductVariantDTO {
 	@ApiProperty({
 		type: ProductVariantStatus,
 		required: false,
+		description:
+			'Status of the product. When status is Inactive, this variant will not be shown in client app. Default is Active',
 		enum: [ProductVariantStatus.Active, ProductVariantStatus.Inactive],
+		example: ProductVariantStatus.Active,
 	})
 	@IsOptional()
 	status: ProductVariantStatus = ProductVariantStatus.Active
