@@ -6,6 +6,7 @@ import {
 	IsNotEmpty,
 	IsNumber,
 	IsOptional,
+	IsString,
 	Validate,
 	ValidateIf,
 	ValidateNested,
@@ -27,7 +28,7 @@ export class ProductColor {
 	label: string
 }
 
-export class ProductSize {
+export class ProductMeasurement {
 	@ApiProperty()
 	@IsNotEmpty()
 	@IsNumber()
@@ -48,18 +49,19 @@ export class ProductSize {
 
 	@ApiProperty()
 	@IsNotEmpty()
+	@IsNumber()
+	@Validate((params) => params.value >= 0)
+	weight: number
+
+	@ApiProperty()
+	@IsNotEmpty()
 	@IsIn(SIZE_UNIT)
-	unit: string
-}
-
-export class ProductWeight {
-	@ApiProperty()
-	@IsNotEmpty()
-	unit: string
+	sizeUnit: string
 
 	@ApiProperty()
 	@IsNotEmpty()
-	value: number
+	@IsString()
+	weightUnit: string
 }
 
 export class ProductImage {
@@ -116,36 +118,23 @@ export class ProductVariantDTO {
 	material: string
 
 	@ApiProperty({
-		type: ProductSize,
+		type: ProductMeasurement,
 		required: false,
 		description:
-			'Size of the variant. This is one of the variant properties',
+			'Measurement of the variant. This is one of the variant properties',
 		example: {
 			width: 10,
 			length: 20,
 			height: 30,
-			unit: 'cm',
+			weight: 5,
+			sizeUnit: 'cm',
+			weightUnit: 'kg',
 		},
 	})
-	@Type(() => ProductSize)
+	@Type(() => ProductMeasurement)
 	@ValidateNested()
 	@ValidateIf((params) => !isNullOrUndefined(params.size))
-	size: ProductSize
-
-	@ApiProperty({
-		type: ProductWeight,
-		required: false,
-		description:
-			'Weight of the variant. This is one of the variant properties',
-		example: {
-			unit: 'kg',
-			value: 0.5,
-		},
-	})
-	@Type(() => ProductWeight)
-	@ValidateNested()
-	@ValidateIf((params) => !isNullOrUndefined(params.weight))
-	weight: ProductWeight
+	measurement: ProductMeasurement
 
 	@ApiProperty({
 		required: true,
@@ -248,7 +237,7 @@ export class ProductDTO {
 	has_material: boolean
 
 	@ApiProperty()
-	has_size: boolean
+	has_measurement: boolean
 
 	@ApiProperty()
 	has_weight: boolean
@@ -277,8 +266,7 @@ export class ProductDTO {
 				...variantProps,
 				color: metadata.color ?? null,
 				material: metadata.material ?? null,
-				size: metadata.size ?? null,
-				weight: metadata.weight ?? null,
+				measurement: metadata.measurement ?? null,
 			}
 		})
 
@@ -286,7 +274,6 @@ export class ProductDTO {
 
 		this.has_color = !!firstVariant.color
 		this.has_material = !!firstVariant.material
-		this.has_size = !!firstVariant.size
-		this.has_weight = !!firstVariant.weight
+		this.has_measurement = !!firstVariant.measurement
 	}
 }

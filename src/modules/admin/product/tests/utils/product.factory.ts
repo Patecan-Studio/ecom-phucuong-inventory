@@ -86,8 +86,14 @@ export class ProductDTOBuilder {
 	withDuplicateVariantValue(
 		color: string,
 		material?: string,
-		size?: { width: number; height: number; length: number; unit: string },
-		weight?: { value: number; unit: string },
+		size?: {
+			width: number
+			height: number
+			length: number
+			weight: number
+			sizeUnit: string
+			weightUnit: string
+		},
 	) {
 		const property_list = [
 			{
@@ -104,10 +110,6 @@ export class ProductDTOBuilder {
 			{
 				name: 'size',
 				value: size,
-			},
-			{
-				name: 'weight',
-				value: weight,
 			},
 		]
 		this._result.product_variants = [

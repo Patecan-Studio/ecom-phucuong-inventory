@@ -23,8 +23,7 @@ export class ProductVariantFactory {
 			status,
 			color: null,
 			material: null,
-			size: null,
-			weight: null,
+			measurement: null,
 		}
 		property_list.forEach((property) => {
 			switch (property) {
@@ -34,18 +33,14 @@ export class ProductVariantFactory {
 				case 'material':
 					dto.material = getRandomAlphabetString(10)
 					break
-				case 'size':
-					dto.size = {
+				case 'measurement':
+					dto.measurement = {
 						height: randomInt(100),
 						length: randomInt(100),
 						width: randomInt(100),
-						unit: 'cm',
-					}
-					break
-				case 'weight':
-					dto.weight = {
-						value: randomInt(10),
-						unit: 'kg',
+						weight: randomInt(10),
+						sizeUnit: 'cm',
+						weightUnit: 'kg',
 					}
 					break
 				default:
@@ -76,8 +71,7 @@ export class ProductVariantFactory {
 			status,
 			color: null,
 			material: null,
-			size: null,
-			weight: null,
+			measurement: null,
 		}
 
 		property_list.forEach((property) => {

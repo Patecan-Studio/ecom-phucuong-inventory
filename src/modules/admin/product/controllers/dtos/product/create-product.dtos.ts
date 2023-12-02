@@ -21,7 +21,8 @@ export class CreateProductRequestDTO {
 	product_name: string
 
 	@ApiProperty({
-		description: 'This is test product',
+		description: 'Description of the product',
+		example: 'This is test product',
 	})
 	@IsNotEmpty()
 	product_description: string

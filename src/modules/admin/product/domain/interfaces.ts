@@ -30,15 +30,13 @@ export interface CreateProductVariantDTO {
 		value: string
 	}
 	material: string
-	size: {
+	measurement: {
 		width: number
 		height: number
 		length: number
-		unit: string
-	}
-	weight: {
-		value: number
-		unit: string
+		weight: number
+		sizeUnit: string
+		weightUnit: string
 	}
 	price: number
 	discount_price: number

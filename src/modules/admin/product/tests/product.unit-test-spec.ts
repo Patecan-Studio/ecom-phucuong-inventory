@@ -162,14 +162,20 @@ describe('Product', () => {
 
 				const productDTO = productDTOBuilder
 					.createProduct()
-					.withVariant('SKU01', ['color'])
-					.withVariant('SKU02', ['color'])
-					.withVariant('SKU03', ['color']).result
+					.withVariant('SKU01', ['color', 'material', 'measurement'])
+					.withVariant('SKU02', ['color', 'material', 'measurement'])
+					.withVariant('SKU03', [
+						'color',
+						'material',
+						'measurement',
+					]).result
 
 				let error
 				try {
 					const product = Product.createProduct(productDTO)
-					expect(product.variantType).toEqual('color')
+					expect(product.variantType).toContain('color')
+					expect(product.variantType).toContain('material')
+					expect(product.variantType).toContain('measurement')
 				} catch (e) {
 					error = e
 				} finally {
@@ -253,8 +259,7 @@ describe('Product', () => {
 						label: 'Update red',
 					},
 					material: 'Update material',
-					size: null,
-					weight: null,
+					measurement: null,
 					price: 100,
 					discount_price: 100,
 					quantity: 100,

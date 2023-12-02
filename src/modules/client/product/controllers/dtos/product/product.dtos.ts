@@ -20,15 +20,7 @@ export class ProductColor {
 	value: string
 }
 
-export class ProductWeight {
-	@ApiProperty()
-	unit: string
-
-	@ApiProperty()
-	value: number
-}
-
-export class ProductSize {
+export class ProductMeasurement {
 	@ApiProperty()
 	width: number
 
@@ -39,7 +31,10 @@ export class ProductSize {
 	height: number
 
 	@ApiProperty()
-	unit: string
+	sizeUnit: string
+
+	@ApiProperty()
+	weightUnit: string
 }
 
 export class ProductImage {
@@ -61,23 +56,29 @@ export class ProductCategory {
 	category_logoUrl: string
 }
 
-export class ProductVariant {
+export class VariantMetadata {
 	@ApiProperty()
-	sku: string
-
-	@ApiProperty({
-		type: ProductColor,
-	})
 	color: ProductColor
 
 	@ApiProperty()
 	material: string
 
 	@ApiProperty()
-	size: ProductSize
+	measurement: ProductMeasurement
+}
+
+export class ProductVariant {
+	@ApiProperty()
+	sku: string
 
 	@ApiProperty()
-	weight: ProductWeight
+	color: string
+
+	@ApiProperty()
+	material: string
+
+	@ApiProperty()
+	measurement: string
 
 	@ApiProperty()
 	quantity: number
@@ -96,6 +97,12 @@ export class ProductVariant {
 	})
 	@Type(() => ProductImage)
 	image_list: ProductImage[]
+
+	@ApiProperty({
+		type: VariantMetadata,
+	})
+	@Type(() => VariantMetadata)
+	metadata: VariantMetadata
 }
 
 export class ClientProductDTO {
@@ -193,14 +200,6 @@ export class ProductDetailResponseDTO {
 	product_brand: ProductBrand
 
 	@ApiProperty({
-		type: [ProductColor],
-	})
-	product_colors: ProductColor[]
-
-	@ApiProperty()
-	product_materials: string[]
-
-	@ApiProperty({
 		type: [ProductVariant],
 	})
 	product_variants: ProductVariant[]
@@ -212,21 +211,6 @@ export class ProductDetailResponseDTO {
 
 	@ApiProperty()
 	product_warranty: string
-
-	@ApiProperty()
-	sku: string
-
-	@ApiProperty()
-	price: number
-
-	@ApiProperty()
-	discount_percentage: number
-
-	@ApiProperty()
-	discount_price: number
-
-	@ApiProperty()
-	quantity: number
 
 	@ApiProperty({
 		type: ProductImage,
@@ -247,9 +231,8 @@ export class ProductDetailResponseDTO {
 			return {
 				...variantProps,
 				color: properties.color ?? null,
-				material: properties.material?.value ?? null,
-				size: properties.size ?? null,
-				weight: properties.weight ?? null,
+				material: properties.material ?? null,
+				measurement: properties.measurement ?? null,
 			}
 		})
 	}

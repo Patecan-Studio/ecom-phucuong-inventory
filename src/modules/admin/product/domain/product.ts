@@ -203,26 +203,22 @@ export class Product {
 			})
 			metadata['material'] = variant.material
 		}
-		if (variant.size) {
-			const value = `${variant.size.width}x${variant.size.height}x${variant.size.length}|${variant.size.unit}`
+		if (variant.measurement) {
+			const { height, length, width, weight, sizeUnit, weightUnit } =
+				variant.measurement
+			const value = `${width}x${length}x${height}(${sizeUnit})|${weight}(${weightUnit})` // 10x10x10(cm)|10(kg)
 			property_list.push({
-				key: 'size',
+				key: 'measurement',
 				value,
 			})
-			metadata['size'] = {
-				width: variant.size.width,
-				height: variant.size.height,
-				length: variant.size.length,
-				unit: variant.size.unit,
+			metadata['measurement'] = {
+				width,
+				length,
+				height,
+				weight,
+				sizeUnit,
+				weightUnit,
 			}
-		}
-		if (variant.weight) {
-			const value = `${variant.weight.value}|${variant.weight.unit}`
-			property_list.push({
-				key: 'weight',
-				value,
-			})
-			metadata['weight'] = variant.weight
 		}
 
 		return {

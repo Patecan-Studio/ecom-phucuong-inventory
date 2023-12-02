@@ -119,6 +119,7 @@ export class ProductRepository extends BaseRepository {
 			return null
 		}
 		const raw = product.toObject({
+			flattenObjectIds: true,
 			versionKey: false,
 			depopulate: true,
 		})
