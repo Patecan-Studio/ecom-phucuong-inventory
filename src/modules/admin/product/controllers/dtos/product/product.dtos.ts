@@ -133,7 +133,7 @@ export class ProductVariantDTO {
 	})
 	@Type(() => ProductMeasurement)
 	@ValidateNested()
-	@ValidateIf((params) => !isNullOrUndefined(params.size))
+	@ValidateIf((params) => !isNullOrUndefined(params.measurement))
 	measurement: ProductMeasurement
 
 	@ApiProperty({
