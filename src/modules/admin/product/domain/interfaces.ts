@@ -40,6 +40,7 @@ export interface CreateProductVariantDTO {
 	}
 	price: number
 	discount_price: number
+	discount_percentage?: number
 	quantity: number
 	image_list: ProductImage[]
 	status?: ProductVariantStatus

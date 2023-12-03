@@ -11,22 +11,63 @@ import { ProductDTOBuilder } from './utils/product.factory'
 
 describe('Product', () => {
 	describe('When a product is created', () => {
-		it('Throw InvalidDiscountPriceException if any variant has discount price bigger than price', () => {
-			const productDTOBuilder = new ProductDTOBuilder()
+		describe('Test discount percentage', () => {
+			it('Throw InvalidDiscountPriceException if any variant has discount price bigger than price', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
 
-			const productDTO = productDTOBuilder
-				.createProduct()
-				.withOneVariant(['color'])
-				.withPrice(100, 200).result
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['color'])
+					.withPrice(100, 200).result
 
-			let error
-			try {
-				Product.createProduct(productDTO)
-			} catch (e) {
-				error = e
-			} finally {
-				expect(error).toBeInstanceOf(InvalidDiscountPriceException)
-			}
+				let error
+				try {
+					Product.createProduct(productDTO)
+				} catch (e) {
+					error = e
+				} finally {
+					expect(error).toBeInstanceOf(InvalidDiscountPriceException)
+				}
+			})
+
+			it('Price is 0', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['color'])
+					.withPrice(0, 100).result
+
+				const product = Product.createProduct(productDTO)
+				const data = product.serialize()
+				expect(data.product_variants[0].discount_percentage).toEqual(0)
+			})
+
+			it('Price and discount price are equal and not 0', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['color'])
+					.withPrice(200, 200).result
+
+				const product = Product.createProduct(productDTO)
+				const data = product.serialize()
+				expect(data.product_variants[0].discount_percentage).toEqual(0)
+			})
+
+			it('Price and discount_price are not equal', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['color'])
+					.withPrice(200, 100).result
+
+				const product = Product.createProduct(productDTO)
+				const data = product.serialize()
+				expect(data.product_variants[0].discount_percentage).toEqual(50)
+			})
 		})
 
 		describe('If product has no active variant', () => {
@@ -186,6 +227,108 @@ describe('Product', () => {
 	})
 
 	describe('When a product is updated', () => {
+		describe('Test discount percentage', () => {
+			it('Throw InvalidDiscountPriceException if any variant has discount price bigger than price', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['color'])
+					.withPrice(100, 100).result
+
+				const product = Product.createProduct(productDTO)
+
+				let error
+				try {
+					productDTO.product_variants[0].discount_price = 300
+					product.update({
+						...productDTO,
+						product_variants: productDTO.product_variants,
+					})
+				} catch (e) {
+					error = e
+				} finally {
+					expect(error).toBeInstanceOf(InvalidDiscountPriceException)
+				}
+			})
+
+			it('Price is 0', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['color'])
+					.withPrice(100, 100).result
+
+				const product = Product.createProduct(productDTO)
+
+				productDTO.product_variants[0].price = 0
+				product.update({
+					...productDTO,
+					product_variants: productDTO.product_variants,
+				})
+				const data = product.serialize()
+				expect(data.product_variants[0].discount_percentage).toEqual(0)
+				expect(data.product_variants[0].discount_price).toEqual(0)
+			})
+
+			it('Price and discount price are equal and not 0', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['color'])
+					.withPrice(200, 200).result
+
+				const product = Product.createProduct(productDTO)
+
+				let error
+				try {
+					productDTO.product_variants[0].discount_price = 200
+					product.update({
+						...productDTO,
+						product_variants: productDTO.product_variants,
+					})
+					const data = product.serialize()
+					expect(
+						data.product_variants[0].discount_percentage,
+					).toEqual(0)
+				} catch (e) {
+					error = e
+				} finally {
+					expect(error).toBeUndefined()
+				}
+			})
+
+			it('Price and discount_price are not equal', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['color'])
+					.withPrice(200, 100).result
+
+				const product = Product.createProduct(productDTO)
+
+				let error
+				try {
+					productDTO.product_variants[0].discount_price = 150
+					product.update({
+						...productDTO,
+						product_variants: productDTO.product_variants,
+					})
+					const data = product.serialize()
+					expect(
+						data.product_variants[0].discount_percentage,
+					).toEqual(25)
+				} catch (e) {
+					error = e
+				} finally {
+					expect(error).toBeUndefined()
+				}
+			})
+		})
+
 		it('Throw InvalidProductVariantException if number of updated variant is smaller than variants in product', () => {
 			const productDTOBuilder = new ProductDTOBuilder()
 

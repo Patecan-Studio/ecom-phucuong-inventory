@@ -40,10 +40,15 @@ export class ProductDTOBuilder {
 		return this
 	}
 
-	withPrice(price: number, discount_price: number) {
+	withPrice(
+		price: number,
+		discount_price: number,
+		discount_percentage?: number,
+	) {
 		this._result.product_variants.forEach((variant) => {
 			variant.price = price
 			variant.discount_price = discount_price
+			variant.discount_percentage = discount_percentage
 		})
 		return this
 	}

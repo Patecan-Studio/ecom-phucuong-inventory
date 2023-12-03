@@ -53,24 +53,25 @@ export class ProductVariant {
 
 	constructor(props: ProductVariantProps) {
 		this.props = props
-		this.validate()
 
+		this.calculateDiscountPercentage()
 		this.updateVariantType()
+		this.validate()
 	}
 
 	update(props: UpdateVariantProps) {
-		this.props.discount_percentage = Math.round(
-			((props.price - props.discount_price) / props.price) * 100,
-		)
 		this.props.price = props.price
 		this.props.discount_price = props.discount_price
+		this.calculateDiscountPercentage()
+
 		this.props.quantity = props.quantity
 		this.props.image_list = props.image_list
 		this.props.metadata = props.metadata
 		props.status && (this.props.status = props.status)
 
-		this.validate()
 		this.updateVariantType()
+
+		this.validate()
 	}
 
 	protected validate() {
@@ -122,18 +123,19 @@ export class ProductVariant {
 			.join('#')
 	}
 
-	static create(props: ProductVariantProps) {
-		// round to 1 decimal
-		const discount_percentage =
-			props.discount_percentage ||
-			Math.round(
-				((props.price - props.discount_price) / props.price) * 100,
+	protected calculateDiscountPercentage() {
+		const { price, discount_price } = this.props
+		if (price === 0) {
+			this.props.discount_percentage = 0
+			this.props.discount_price = 0
+		} else {
+			this.props.discount_percentage = Math.round(
+				((price - discount_price) / price) * 100,
 			)
-		props.status ||= ProductVariantStatus.Active
+		}
+	}
 
-		return new ProductVariant({
-			...props,
-			discount_percentage,
-		})
+	static create(props: ProductVariantProps) {
+		return new ProductVariant(props)
 	}
 }
