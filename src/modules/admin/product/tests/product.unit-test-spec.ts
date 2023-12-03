@@ -227,6 +227,106 @@ describe('Product', () => {
 	})
 
 	describe('When a product is updated', () => {
+		describe('Test update variant property', () => {
+			it('Update color', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['color']).result
+
+				const product = Product.createProduct(productDTO)
+
+				productDTO.product_variants[0].color = {
+					value: 'update color value',
+					label: 'update color label',
+				}
+				product.update({
+					...productDTO,
+					product_variants: productDTO.product_variants,
+				})
+
+				const data = product.serialize()
+				expect(data.product_variants[0].property_list[0]).toEqual({
+					key: 'color',
+					value: 'update color value',
+				})
+				expect(data.product_variants[0].metadata).toHaveProperty(
+					'color',
+					{
+						value: 'update color value',
+						label: 'update color label',
+					},
+				)
+			})
+
+			it('Update material', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['material']).result
+
+				const product = Product.createProduct(productDTO)
+
+				productDTO.product_variants[0].material = 'update material'
+				product.update({
+					...productDTO,
+					product_variants: productDTO.product_variants,
+				})
+
+				const data = product.serialize()
+				expect(data.product_variants[0].property_list[0]).toEqual({
+					key: 'material',
+					value: 'update material',
+				})
+				expect(data.product_variants[0].metadata).toHaveProperty(
+					'material',
+					'update material',
+				)
+			})
+
+			it('Update measurement', () => {
+				const productDTOBuilder = new ProductDTOBuilder()
+
+				const productDTO = productDTOBuilder
+					.createProduct()
+					.withOneVariant(['measurement']).result
+
+				const product = Product.createProduct(productDTO)
+
+				productDTO.product_variants[0].measurement = {
+					height: 1,
+					length: 1,
+					width: 5,
+					weight: 1,
+					sizeUnit: 'cm',
+					weightUnit: 'kg',
+				}
+				product.update({
+					...productDTO,
+					product_variants: productDTO.product_variants,
+				})
+
+				const data = product.serialize()
+				expect(data.product_variants[0].property_list[0]).toEqual({
+					key: 'measurement',
+					value: '5x1x1(cm)|1(kg)',
+				})
+				expect(data.product_variants[0].metadata).toHaveProperty(
+					'measurement',
+					{
+						height: 1,
+						length: 1,
+						width: 5,
+						weight: 1,
+						sizeUnit: 'cm',
+						weightUnit: 'kg',
+					},
+				)
+			})
+		})
+
 		describe('Test discount percentage', () => {
 			it('Throw InvalidDiscountPriceException if any variant has discount price bigger than price', () => {
 				const productDTOBuilder = new ProductDTOBuilder()

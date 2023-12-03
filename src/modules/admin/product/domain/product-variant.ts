@@ -68,6 +68,8 @@ export class ProductVariant {
 		this.props.image_list = props.image_list
 		this.props.metadata = props.metadata
 		props.status && (this.props.status = props.status)
+		this.props.property_list.length = 0
+		this.props.property_list = props.property_list
 
 		this.updateVariantType()
 
