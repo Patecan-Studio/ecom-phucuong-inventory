@@ -44,8 +44,8 @@ class ApiKeyAuthGuardClass implements CanActivate {
 }
 
 @Injectable()
-class JwtAuthGuardClass implements CanActivate {
-	private readonly logger = new Logger(JwtAuthGuardClass.name)
+class SupabaseGuardClass implements CanActivate {
+	private readonly logger = new Logger(SupabaseGuardClass.name)
 	constructor(
 		@Inject(AUTH_MODULE_CONFIG)
 		private readonly authGuardConfig: AuthModuleConfig,
@@ -93,7 +93,8 @@ export const AuthGuard = (type: AuthType) => {
 		case 'apiKey':
 			return ApiKeyAuthGuardClass
 		case 'jwtToken':
-			return JwtAuthGuardClass
+		case 'supabase':
+			return SupabaseGuardClass
 		default:
 			throw new Error('Invalid auth type')
 	}

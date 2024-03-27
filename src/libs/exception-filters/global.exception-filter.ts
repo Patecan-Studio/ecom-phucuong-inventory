@@ -22,7 +22,7 @@ export const createExceptionFilter = (
 			// application exception
 			if (exception instanceof HttpException) {
 				statusCode = exception.getStatus()
-				code = exception.name
+				code = statusCode
 				message = exception.message
 			} else if (exception instanceof BaseException) {
 				statusCode = 400
@@ -37,6 +37,8 @@ export const createExceptionFilter = (
 			const res = host.switchToHttp().getResponse() as Response
 			res.status(statusCode).json({
 				resultCode: resultCodeMapping[code] || ResultCode.Error,
+				resultMessage: message,
+				// @deprecated - remove this in the future
 				message,
 			})
 		}

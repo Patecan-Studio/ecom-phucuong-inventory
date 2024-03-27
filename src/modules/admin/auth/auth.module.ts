@@ -1,7 +1,8 @@
 import { Global, Module } from '@nestjs/common'
 import { AUTH_MODULE_CONFIG } from './constants'
 import { ConfigService } from '@nestjs/config'
-import { WebHookAuthController } from './auth.controller'
+import { AuthController } from './auth.controller'
+import { WebHookAuthController } from './auth-webhook.controller'
 
 @Global()
 @Module({
@@ -14,6 +15,6 @@ import { WebHookAuthController } from './auth.controller'
 		},
 	],
 	exports: [AUTH_MODULE_CONFIG],
-	controllers: [WebHookAuthController],
+	controllers: [WebHookAuthController, AuthController],
 })
 export class AdminAuthModule {}

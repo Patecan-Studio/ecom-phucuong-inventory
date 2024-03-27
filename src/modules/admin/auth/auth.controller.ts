@@ -1,16 +1,23 @@
-import { Body, Controller, Inject, Logger, Post } from '@nestjs/common'
-import { AuthModuleConfig, SupabaseRecordInsertWebHook } from './interfaces'
+import {
+	Body,
+	Controller,
+	ForbiddenException,
+	HttpCode,
+	Inject,
+	Logger,
+	Post,
+	UnauthorizedException,
+} from '@nestjs/common'
+import { AuthModuleConfig } from './interfaces'
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
 import { ApiTags } from '@nestjs/swagger'
 import { AUTH_MODULE_CONFIG, USER_ROLES } from './constants'
-import { SuccessResponseDTO } from '@libs'
-import { AdminAuth } from './decorators'
+import { AuthLoginRequest, AuthLoginResponse } from './dtos/login.dtos'
 
-@Controller('/v1/admin/auth/webhook')
-@AdminAuth('apiKey')
-@ApiTags('Webhook')
-export class WebHookAuthController {
-	private readonly logger = new Logger(WebHookAuthController.name)
+@Controller('/v1/admin/auth')
+@ApiTags('Auth - Admin')
+export class AuthController {
+	private readonly logger = new Logger(AuthController.name)
 	private readonly supabase: SupabaseClient
 
 	constructor(
@@ -24,39 +31,30 @@ export class WebHookAuthController {
 		)
 	}
 
-	@Post('onUserAdded')
-	async onUserUpdated(@Body() body: SupabaseRecordInsertWebHook) {
-		const user = body.record
-		const userRole = user.raw_user_meta_data.role
-		if (userRole) {
-			this.logger.log(
-				`User with ID ${user.id} is already assigned with role ${userRole}`,
-			)
-			return new SuccessResponseDTO({
-				data: null,
-			})
-		}
-		const { data, error } = await this.supabase.auth.admin.updateUserById(
-			user.id,
-			{
-				user_metadata: {
-					...user.raw_user_meta_data,
-					role: USER_ROLES.ADMIN,
-				},
-			},
-		)
-
+	@Post('login')
+	@HttpCode(200)
+	async login(@Body() body: AuthLoginRequest): Promise<AuthLoginResponse> {
+		const { email, password } = body
+		const { data, error } = await this.supabase.auth.signInWithPassword({
+			email,
+			password,
+		})
 		if (error) {
 			this.logger.error(error)
-			throw new Error('Unknown error')
+			throw new UnauthorizedException('Invalid email or password')
 		}
-
-		this.logger.log(
-			`User with ID '${user.id}' is successfully assigned with role '${USER_ROLES.ADMIN}'`,
-		)
-
-		return new SuccessResponseDTO({
-			data: data.user,
-		})
+		const { user, session } = data
+		if (user.user_metadata.role !== USER_ROLES.ADMIN) {
+			throw new ForbiddenException(
+				'You are not authorized to access this resource',
+			)
+		}
+		return {
+			resultCode: 200,
+			data: {
+				user,
+				session,
+			},
+		}
 	}
 }

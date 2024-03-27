@@ -158,6 +158,11 @@ export class ClientProductDTO {
 	@Type(() => ProductImage)
 	image: ProductImage
 
+	@ApiProperty({
+		type: VariantMetadata,
+	})
+	metadata: VariantMetadata
+
 	constructor(props: any) {
 		const firstVariant = props.product_variants[0]
 		delete props.product_variants
@@ -169,6 +174,7 @@ export class ClientProductDTO {
 		this.discount_price = firstVariant.discount_price
 		this.quantity = firstVariant.quantity
 		this.image = firstVariant.image_list[0]
+		this.metadata = firstVariant.metadata
 	}
 }
 

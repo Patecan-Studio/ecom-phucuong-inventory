@@ -10,7 +10,11 @@ export interface AuthModuleConfig {
 	}
 }
 
-export type AuthType = 'apiKey' | 'jwtToken'
+export type AuthType =
+	| 'apiKey'
+	| 'supabase'
+	// @deprecated. Use 'supabase' instead
+	| 'jwtToken'
 
 export interface AuthTokenPayload {
 	sub: string

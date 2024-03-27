@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 
 export class SuccessResponseDTO {
 	@ApiProperty()
-	resultCode: string
+	resultCode: string | number
 
 	@ApiProperty()
 	message: string
